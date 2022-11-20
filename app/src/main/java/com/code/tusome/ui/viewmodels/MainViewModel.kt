@@ -3,7 +3,6 @@ package com.code.tusome.ui.viewmodels
 import android.app.Application
 import android.net.Uri
 import android.view.View
-import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.code.tusome.models.User
@@ -49,6 +48,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                                     .setValue(user)
                                     .addOnSuccessListener {
                                         Utils.snackbar(view,"Registration successful, Login")
+                                        registerStatus = true
                                     }
                             }.addOnFailureListener { e ->
                                 Utils.snackbar(view, e.message!!)
@@ -56,6 +56,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     }
                 }
         }
+        return registerStatus
     }
 
 }
