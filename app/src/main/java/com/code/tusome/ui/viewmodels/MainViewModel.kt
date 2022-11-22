@@ -5,16 +5,24 @@ import android.net.Uri
 import android.view.View
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.code.tusome.Tusome
+import com.code.tusome.db.TusomeDao
 import com.code.tusome.models.User
 import com.code.tusome.utils.Utils
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
     private var loginStatus = false
     private var registerStatus = false
+    @Inject
+    lateinit var tusomeDao: TusomeDao
+    init {
+        (application as Tusome).getRoomComponent().injectMainViewModel(this)
+    }
     fun login(email: String, password: String): Boolean {
         viewModelScope.launch {
             FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
@@ -43,7 +51,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
                             .addOnSuccessListener {
                                 val uid = FirebaseAuth.getInstance().currentUser!!.uid
-                                val user = User(uid, username, email, imageUrl)
+                                val user = User(0,uid, username, email, imageUrl)
                                 FirebaseDatabase.getInstance().getReference("users/$uid")
                                     .setValue(user)
                                     .addOnSuccessListener {

@@ -4,17 +4,22 @@ import android.Manifest
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore.Images.Media
-import androidx.fragment.app.Fragment
+import android.util.Log
+import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.app.ActivityCompat
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.code.tusome.databinding.FragmentSignUpBinding
+import com.code.tusome.ui.fragments.auth.AuthFragment
 import com.code.tusome.ui.viewmodels.MainViewModel
+import com.code.tusome.utils.Utils
 
 
 class SignUpFragment : Fragment() {
@@ -30,17 +35,17 @@ class SignUpFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.profileIv.setOnClickListener {
-            if (ActivityCompat.checkSelfPermission(
-                    requireContext(), Manifest.permission.READ_EXTERNAL_STORAGE
-                ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                    requireContext(), Manifest.permission.CAMERA
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                requestMediaPermissions()
-            } else {
-                Intent(Intent.ACTION_PICK).apply {
-                    startActivityForResult(this, 200)
+            if (checkGalleryPermission()) {
+                Intent(Intent.ACTION_PICK,Media.EXTERNAL_CONTENT_URI).apply {
+                    type = "image/*"
+                    startActivityForResult(this, GALLERY_CODE)
                 }
+            } else {
+                ActivityCompat.requestPermissions(
+                    requireActivity(),
+                    arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+                    PERMISSION_CODE
+                )
             }
         }
         binding.registerBtn.setOnClickListener {
@@ -48,37 +53,79 @@ class SignUpFragment : Fragment() {
             val email = binding.emailEt.text.toString().trim()
             val password = binding.passwordEt.text.toString().trim()
             val cPassword = binding.confirmPasswordEt.text.toString().trim()
+            if (username.isBlank()) {
+                binding.usernameEtl.error = "Username is required"
+                return@setOnClickListener
+            }
+            if (email.isBlank()) {
+                binding.emailEtl.error = "Email is required"
+                return@setOnClickListener
+            }
+            if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                binding.emailEtl.error = "Invalid email address"
+                return@setOnClickListener
+            }
+            if (password.isBlank()) {
+                binding.passwordEtl.error = "Password is required"
+                return@setOnClickListener
+            }
+            if (password.length < 8) {
+                binding.passwordEtl.error = "Password is too short"
+                return@setOnClickListener
+            }
+            if (cPassword.isBlank()) {
+                binding.confirmPasswordEtl.error = "Cannot be empty"
+                return@setOnClickListener
+            }
+            if (password != cPassword) {
+                binding.passwordEtl.error = "Passwords do not match"
+                binding.confirmPasswordEtl.error = "Passwords do not match"
+                return@setOnClickListener
+            }
+            if (imageUri==null){
+                Utils.snackbar(binding.root,"N profile image selected")
+                return@setOnClickListener
+            }
+            val status = viewModel.register(username, email, password, imageUri, binding.root)
+            if (status) {
+                AuthFragment().setCurrentFrag(1)
+            }
         }
     }
 
-    private fun requestMediaPermissions() {
-        ActivityCompat.requestPermissions(
-            requireActivity(), arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), 300
-        )
-        ActivityCompat.requestPermissions(
-            requireActivity(), arrayOf(Manifest.permission.CAMERA), 400
-        )
-    }
+    private fun checkGalleryPermission(): Boolean = ActivityCompat.checkSelfPermission(
+        requireContext(),
+        Manifest.permission.READ_EXTERNAL_STORAGE
+    ) == PackageManager.PERMISSION_GRANTED
 
     override fun onRequestPermissionsResult(
-        requestCode: Int, permissions: Array<out String>, grantResults: IntArray
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == 300 && permissions.equals(Manifest.permission.READ_EXTERNAL_STORAGE)
-            && grantResults[0] == PackageManager.PERMISSION_GRANTED
+        if (requestCode == PERMISSION_CODE &&
+            permissions.contentEquals(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)) &&
+            grantResults[0] == PackageManager.PERMISSION_GRANTED
         ) {
-            Intent(Intent.ACTION_PICK).apply {
-                startActivityForResult(this, 200)
+            Intent(Intent.ACTION_PICK,Media.EXTERNAL_CONTENT_URI).apply {
+                type = "image/*"
+                startActivityForResult(this, GALLERY_CODE)
             }
         }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == 200 && requestCode == Activity.RESULT_OK && data != null) {
+        if (requestCode == GALLERY_CODE && requestCode == Activity.RESULT_OK && data != null) {
             imageUri = data.data!!
-            val bitmap = Media.getBitmap(requireActivity().contentResolver,imageUri)
-            binding.profileIv.setImageBitmap(bitmap)
+            try {
+                val bitmap: Bitmap = Media.getBitmap(requireActivity().contentResolver, imageUri)
+                Log.i(TAG, "onActivityResult: ${data.data.toString()}")
+                binding.profileIv.setImageBitmap(bitmap)
+            } catch (e: Exception) {
+                Log.e(TAG, "onActivityResult: ${e.message}")
+            }
         }
     }
 
@@ -90,6 +137,9 @@ class SignUpFragment : Fragment() {
     }
 
     companion object {
-        val TAG = SignUpFragment::class.java.simpleName
+        val TAG: String = SignUpFragment::class.java.simpleName
+        const val PERMISSION_CODE = 200
+        const val GALLERY_CODE = 300
+        const val CAMERA_CODE = 400
     }
 }
