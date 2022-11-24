@@ -57,6 +57,6 @@ class LoginFragment : Fragment() {
     }
 
     companion object {
-        val TAG = SignUpFragment::class.java.simpleName
+        private val TAG = SignUpFragment::class.java.simpleName
     }
 }

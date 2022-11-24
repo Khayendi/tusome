@@ -23,6 +23,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     init {
         (application as Tusome).getRoomComponent().injectMainViewModel(this)
     }
+
+    /**
+     * This guy performs login functionality for the current user
+     */
     fun login(email: String, password: String): Boolean {
         viewModelScope.launch {
             FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
@@ -34,7 +38,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
         return loginStatus
     }
-
+    /**
+     * This guy send image to firebase storage bucket and the stores the user data in the realtime db
+     */
     fun register(
         username: String,
         email: String,

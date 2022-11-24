@@ -36,6 +36,9 @@ class SignUpFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         binding.profileIv.setOnClickListener {
             if (checkGalleryPermission()) {
+                /**
+                 * This is an external service - Implicit intent
+                 */
                 Intent(Intent.ACTION_PICK,Media.EXTERNAL_CONTENT_URI).apply {
                     type = "image/*"
                     startActivityForResult(this, GALLERY_CODE)
@@ -93,6 +96,9 @@ class SignUpFragment : Fragment() {
         }
     }
 
+    /**
+     * This checks storage permission of the application
+     */
     private fun checkGalleryPermission(): Boolean = ActivityCompat.checkSelfPermission(
         requireContext(),
         Manifest.permission.READ_EXTERNAL_STORAGE
@@ -108,6 +114,9 @@ class SignUpFragment : Fragment() {
             permissions.contentEquals(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)) &&
             grantResults[0] == PackageManager.PERMISSION_GRANTED
         ) {
+            /**
+             * This is an external service - Implicit Intent
+             */
             Intent(Intent.ACTION_PICK,Media.EXTERNAL_CONTENT_URI).apply {
                 type = "image/*"
                 startActivityForResult(this, GALLERY_CODE)
@@ -140,6 +149,5 @@ class SignUpFragment : Fragment() {
         val TAG: String = SignUpFragment::class.java.simpleName
         const val PERMISSION_CODE = 200
         const val GALLERY_CODE = 300
-        const val CAMERA_CODE = 400
     }
 }

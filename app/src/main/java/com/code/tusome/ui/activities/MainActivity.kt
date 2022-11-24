@@ -20,8 +20,14 @@ class MainActivity : AppCompatActivity() {
         val navController = navHostFragment.navController
         Handler().postDelayed({
             if (FirebaseAuth.getInstance().uid != null) {
+                /**
+                 * This is an example of internal service using navigation components - Explicit intent
+                 */
                 navController.navigate(R.id.action_splashFragment_to_homeFragment)
             } else {
+                /**
+                 * This is an example of internal service using navigation components - Explicit intent
+                 */
                 navController.navigate(R.id.action_splashFragment_to_authFragment)
             }
         }, 3000)
