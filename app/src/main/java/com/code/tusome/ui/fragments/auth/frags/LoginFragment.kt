@@ -43,7 +43,7 @@ class LoginFragment : Fragment() {
             val status = viewModel.login(email, password)
             if (status){
                 Utils.snackbar(binding.root,"Login successful")
-                findNavController().navigate(R.id.action_authFragment_to_homeFragment)
+                findNavController().navigate(R.id.action_authFragment_to_homeActivity)
             }
         }
     }

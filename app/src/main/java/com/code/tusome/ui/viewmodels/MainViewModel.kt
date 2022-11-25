@@ -18,8 +18,10 @@ import javax.inject.Inject
 class MainViewModel(application: Application) : AndroidViewModel(application) {
     private var loginStatus = false
     private var registerStatus = false
+
     @Inject
     lateinit var tusomeDao: TusomeDao
+
     init {
         (application as Tusome).getRoomComponent().injectMainViewModel(this)
     }
@@ -38,6 +40,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
         return loginStatus
     }
+
     /**
      * This guy send image to firebase storage bucket and the stores the user data in the realtime db
      */
@@ -45,31 +48,46 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         username: String,
         email: String,
         password: String,
-        imageUri: Uri,
+//        imageUri: Uri,
         view: View
     ): Boolean {
         viewModelScope.launch {
-            val ref = FirebaseStorage.getInstance().getReference("images")
-            ref.putFile(imageUri)
+            FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
                 .addOnSuccessListener {
-                    ref.downloadUrl.addOnSuccessListener {
-                        val imageUrl = it.toString()
-                        FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
-                            .addOnSuccessListener {
-                                val uid = FirebaseAuth.getInstance().currentUser!!.uid
-                                val user = User(0,uid, username, email, imageUrl)
-                                FirebaseDatabase.getInstance().getReference("users/$uid")
-                                    .setValue(user)
-                                    .addOnSuccessListener {
-                                        Utils.snackbar(view,"Registration successful, Login")
-                                        registerStatus = true
-                                    }
-                            }.addOnFailureListener { e ->
-                                Utils.snackbar(view, e.message!!)
-                            }
-                    }
+                    val uid = FirebaseAuth.getInstance().currentUser!!.uid
+                    val user = User(uid, username, email)
+                    FirebaseDatabase.getInstance().getReference("users/$uid")
+                        .setValue(user)
+                        .addOnSuccessListener {
+                            Utils.snackbar(view, "Registration successful, Login")
+                            registerStatus = true
+                        }
+                }.addOnFailureListener { e ->
+                    Utils.snackbar(view, e.message!!)
                 }
         }
+//        viewModelScope.launch {
+//            val ref = FirebaseStorage.getInstance().getReference("images")
+//            ref.putFile(imageUri)
+//                .addOnSuccessListener {
+//                    ref.downloadUrl.addOnSuccessListener {
+//                        val imageUrl = it.toString()
+//                        FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
+//                            .addOnSuccessListener {
+//                                val uid = FirebaseAuth.getInstance().currentUser!!.uid
+//                                val user = User(0,uid, username, email, imageUrl)
+//                                FirebaseDatabase.getInstance().getReference("users/$uid")
+//                                    .setValue(user)
+//                                    .addOnSuccessListener {
+//                                        Utils.snackbar(view,"Registration successful, Login")
+//                                        registerStatus = true
+//                                    }
+//                            }.addOnFailureListener { e ->
+//                                Utils.snackbar(view, e.message!!)
+//                            }
+//                    }
+//                }
+//        }
         return registerStatus
     }
 

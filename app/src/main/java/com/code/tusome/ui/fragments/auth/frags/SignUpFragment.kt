@@ -85,11 +85,12 @@ class SignUpFragment : Fragment() {
                 binding.confirmPasswordEtl.error = "Passwords do not match"
                 return@setOnClickListener
             }
-            if (imageUri==null){
-                Utils.snackbar(binding.root,"N profile image selected")
-                return@setOnClickListener
-            }
-            val status = viewModel.register(username, email, password, imageUri, binding.root)
+//            if (imageUri==null){
+//                Utils.snackbar(binding.root,"N profile image selected")
+//                return@setOnClickListener
+//            }
+//            val status = viewModel.register(username, email, password, imageUri, binding.root)
+            val status = viewModel.register(username, email, password, binding.root)
             if (status) {
                 AuthFragment().setCurrentFrag(1)
             }
