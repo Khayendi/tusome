@@ -2,6 +2,7 @@ package com.code.tusome.ui.fragments.auth.frags
 
 import android.Manifest
 import android.app.Activity
+import android.app.ProgressDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -26,10 +27,14 @@ class SignUpFragment : Fragment() {
     private lateinit var binding: FragmentSignUpBinding
     private lateinit var viewModel: MainViewModel
     private lateinit var imageUri: Uri
+    private lateinit var progressDialog: ProgressDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel = ViewModelProvider(this)[MainViewModel::class.java]
+        progressDialog.setMessage("Registering....")
+        progressDialog.setCancelable(false)
+        progressDialog.create()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -52,27 +57,33 @@ class SignUpFragment : Fragment() {
             }
         }
         binding.registerBtn.setOnClickListener {
+            progressDialog.show()
             val username = binding.usernameEt.text.toString().trim()
             val email = binding.emailEt.text.toString().trim()
             val password = binding.passwordEt.text.toString().trim()
             val cPassword = binding.confirmPasswordEt.text.toString().trim()
             if (username.isBlank()) {
+                progressDialog.dismiss()
                 binding.usernameEtl.error = "Username is required"
                 return@setOnClickListener
             }
             if (email.isBlank()) {
+                progressDialog.dismiss()
                 binding.emailEtl.error = "Email is required"
                 return@setOnClickListener
             }
             if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                progressDialog.dismiss()
                 binding.emailEtl.error = "Invalid email address"
                 return@setOnClickListener
             }
             if (password.isBlank()) {
+                progressDialog.dismiss()
                 binding.passwordEtl.error = "Password is required"
                 return@setOnClickListener
             }
             if (password.length < 8) {
+                progressDialog.dismiss()
                 binding.passwordEtl.error = "Password is too short"
                 return@setOnClickListener
             }
@@ -81,6 +92,7 @@ class SignUpFragment : Fragment() {
                 return@setOnClickListener
             }
             if (password != cPassword) {
+                progressDialog.dismiss()
                 binding.passwordEtl.error = "Passwords do not match"
                 binding.confirmPasswordEtl.error = "Passwords do not match"
                 return@setOnClickListener
@@ -92,6 +104,7 @@ class SignUpFragment : Fragment() {
 //            val status = viewModel.register(username, email, password, imageUri, binding.root)
             val status = viewModel.register(username, email, password, binding.root)
             if (status) {
+                progressDialog.dismiss()
                 AuthFragment().setCurrentFrag(1)
             }
         }
