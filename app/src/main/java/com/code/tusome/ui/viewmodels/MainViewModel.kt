@@ -4,6 +4,8 @@ import android.app.Application
 import android.net.Uri
 import android.view.View
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.code.tusome.Tusome
 import com.code.tusome.db.TusomeDao
@@ -16,11 +18,13 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
-    private var loginStatus = false
-    private var registerStatus = false
+    private var loginStatus:MutableLiveData<Boolean> = MutableLiveData()
+    private var registerStatus:MutableLiveData<Boolean> = MutableLiveData()
 
     @Inject
     lateinit var tusomeDao: TusomeDao
+//    @Inject
+//    lateinit var firebaseDatabase: FirebaseDatabase
 
     init {
         (application as Tusome).getRoomComponent().injectMainViewModel(this)
@@ -29,13 +33,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     /**
      * This guy performs login functionality for the current user
      */
-    fun login(email: String, password: String): Boolean {
+    fun login(email: String, password: String): LiveData<Boolean> {
         viewModelScope.launch {
             FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
                 .addOnSuccessListener {
-                    loginStatus = true
+                    loginStatus.postValue(true)
                 }.addOnFailureListener {
-                    loginStatus = false
+                    loginStatus.postValue(false)
                 }
         }
         return loginStatus
@@ -50,7 +54,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         password: String,
 //        imageUri: Uri,
         view: View
-    ): Boolean {
+    ): LiveData<Boolean> {
         viewModelScope.launch {
             FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
                 .addOnSuccessListener {
@@ -60,9 +64,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         .setValue(user)
                         .addOnSuccessListener {
                             Utils.snackbar(view, "Registration successful, Login")
-                            registerStatus = true
+                            registerStatus.postValue(true)
                         }
                 }.addOnFailureListener { e ->
+                    registerStatus.postValue(false)
                     Utils.snackbar(view, e.message!!)
                 }
         }

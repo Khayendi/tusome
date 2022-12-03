@@ -50,11 +50,13 @@ class LoginFragment : Fragment() {
                 binding.passwordEtl.error="Password is required"
                 return@setOnClickListener
             }
-            val status = viewModel.login(email, password)
-            if (status){
-                progressDialog.dismiss()
-                Utils.snackbar(binding.root,"Login successful")
-                findNavController().navigate(R.id.action_authFragment_to_homeActivity)
+            val status = viewModel.login(email, password).observe(viewLifecycleOwner){
+                if (it){
+                    progressDialog.dismiss()
+                    Utils.snackbar(binding.root,"Login successful")
+                    findNavController().navigate(R.id.action_authFragment_to_homeActivity)
+                }
+                Utils.snackbar(binding.root,"Error logging in")
             }
         }
     }

@@ -16,6 +16,9 @@ class CatsFragment : Fragment() {
 
     }
 
+    /**
+     * This is an instance of a lifecycle of the fragment
+     */
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
