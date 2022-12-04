@@ -23,14 +23,15 @@ class MainActivity : AppCompatActivity() {
                 /**
                  * This is an example of internal service using navigation components - Explicit intent
                  */
-                navController.navigate(R.id.action_splashFragment_to_homeFragment)
+                navController.navigate(R.id.action_splashFragment_to_homeActivity)
+                finish()
             } else {
                 /**
                  * This is an example of internal service using navigation components - Explicit intent
                  */
                 navController.navigate(R.id.action_splashFragment_to_authFragment)
             }
-        }, 3000)
+        }, 2000)
 
     }
 }

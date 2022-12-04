@@ -4,6 +4,7 @@ import android.app.Application
 import com.code.tusome.di.DaggerRoomComponent
 import com.code.tusome.di.RoomComponent
 import com.code.tusome.di.RoomModule
+import com.google.firebase.database.FirebaseDatabase
 
 class Tusome:Application() {
     private lateinit var roomComponent:RoomComponent
